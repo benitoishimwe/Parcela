@@ -11,7 +11,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { Colors } from '../../constants/Colors';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const router = useRouter();
   const [identifier, setIdentifier] = useState('');
