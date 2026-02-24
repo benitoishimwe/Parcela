@@ -70,6 +70,7 @@ export default function UserLayout() {
       />
       <Tabs.Screen name="history" options={{ href: null }} />
       <Tabs.Screen name="qrcode" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
     </Tabs>
   );
 }
