@@ -166,6 +166,7 @@ export const translations: Translations = {
     parcel_size: "Ingano y'Umupako",
     choose_locker: 'Hitamo Inziga yo Kurungika',
     payment: 'Kwishyura',
+    payment_method: 'Uburyo bwo Kwishyura',
     small: 'Gito',
     medium: 'Hagati',
     large: 'Kinini',
