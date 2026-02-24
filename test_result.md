@@ -430,3 +430,35 @@ agent_communication:
       
       Please test all backend endpoints first, then frontend if needed.
       Focus on high priority items: auth, parcels, lockers.
+  - agent: "main"
+    message: |
+      NEW FEATURES IMPLEMENTED - Phases 4, 5, 6 + Notifications:
+      
+      Phase 4 - Courier QR Scanner:
+      - Completely rewrote (courier)/task.tsx with expo-camera QR scanning
+      - Full-screen camera modal with corner-indicator scan overlay
+      - Manual entry fallback (especially for web)
+      - QR format: AKABATI:{parcel_id}:{tracking_code}:{pickup_code}
+      - Shows parcel details after scan + status update buttons
+      
+      Phase 5 - Admin Locker Management:
+      - Rewrote admin/lockers.tsx with full create/edit modal
+      - "Add Locker" button opens a form sheet
+      - Form: name, address, district (chips or free text), lat/lng, compartment counts
+      - Uses POST /api/lockers to create, PUT /api/admin/lockers/{id} to edit
+      
+      Phase 6 - Notifications & Send Flow:
+      - Created (user)/notifications.tsx - full notification center
+      - Added notification bell with badge count to home screen header
+      - Backend: send_parcel_notification helper creates DB notifications when status changes
+      - Added PUT /api/notifications/read-all endpoint
+      - Track screen: accepts 'code' param from notification tap
+      - Registered notifications route in (user)/_layout.tsx
+      
+      Please test:
+      1. Courier scan tab - shows camera scan button and manual entry
+      2. Admin lockers - Add button opens create form, save creates locker
+      3. Home screen - shows bell icon with badge
+      4. Notifications screen - accessible from bell
+      5. Update parcel status (admin) and verify notification is created
+      6. Send parcel end-to-end flow
