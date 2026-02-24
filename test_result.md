@@ -117,123 +117,123 @@ user_problem_statement: |
 backend:
   - task: "User signup and login (JWT)"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Implemented signup and login endpoints with JWT tokens. Seed data includes admin, test user, and courier accounts."
+      - working: true
+        agent: "testing"
+        comment: "Signup and login both working. JWT tokens returned correctly. Role assigned properly."
 
   - task: "Google OAuth callback"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Implemented Google OAuth callback using Emergent Auth. Session-based authentication."
+      - working: true
+        agent: "testing"
+        comment: "Google OAuth callback endpoint functional. Session token stored in DB."
 
   - task: "Get current user (/api/auth/me)"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Endpoint to retrieve logged-in user details from JWT or session token."
+      - working: true
+        agent: "testing"
+        comment: "Returns user details from JWT. Password hash excluded from response."
 
   - task: "Locker CRUD endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "GET /api/lockers - returns all lockers. Seed data includes 8 Kigali lockers."
+      - working: true
+        agent: "testing"
+        comment: "8 Kigali lockers returned. Locker data includes availability per size."
 
   - task: "Create parcel and process payment"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "POST /api/parcels creates parcel, POST /api/parcels/{id}/payment simulates payment."
+      - working: true
+        agent: "testing"
+        comment: "Parcel creation and stubbed payment both working. Returns tracking_code and qr_data."
 
   - task: "Track parcel by tracking code"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "GET /api/parcels/track/{tracking_code} returns parcel without QR data."
+      - working: true
+        agent: "testing"
+        comment: "GET /api/parcels/track/{code} returns parcel with status_history. qr_data excluded."
 
   - task: "Get user's parcels"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "GET /api/parcels/my returns parcels for logged-in user (sender or recipient)."
+      - working: true
+        agent: "testing"
+        comment: "Returns all parcels where user is sender or recipient."
 
   - task: "Admin stats and management endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "GET /api/admin/stats, /admin/users, /admin/parcels, /admin/lockers all implemented."
+      - working: true
+        agent: "testing"
+        comment: "All admin endpoints working. Role-based access enforced."
 
   - task: "Courier task management"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "GET /api/courier/tasks and PUT /api/courier/tasks/{id}/complete implemented."
+      - working: true
+        agent: "testing"
+        comment: "Courier tasks returned. Mark complete updates parcel status correctly."
 
   - task: "Seed data on startup"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Seeds 8 Kigali lockers, admin user (benishimwe31@gmail.com/admin123), test user (+250788111222/test123), courier (+250788333444/courier123), 5 sample parcels, 2 courier tasks."
+      - working: true
+        agent: "testing"
+        comment: "8 lockers, 3 users, 5 parcels, 2 courier tasks seeded successfully."
 
 frontend:
   - task: "App loads and shows login screen"
