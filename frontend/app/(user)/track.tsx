@@ -1,28 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Colors, STATUS_COLORS, STATUS_LABELS } from '../../constants/Colors';
 import { api } from '../../utils/api';
 
 export default function Track() {
   const { t } = useLanguage();
-  const [code, setCode] = useState('');
+  const params = useLocalSearchParams<{ code?: string }>();
+  const [code, setCode] = useState(params.code || '');
   const [loading, setLoading] = useState(false);
   const [parcel, setParcel] = useState<any>(null);
   const [error, setError] = useState('');
 
-  const handleTrack = async () => {
-    if (!code.trim()) return;
+  const handleTrack = async (trackCode?: string) => {
+    const searchCode = (trackCode || code).trim();
+    if (!searchCode) return;
     setLoading(true);
     setError('');
     setParcel(null);
     try {
-      const data = await api.get(`/api/parcels/track/${code.trim().toUpperCase()}`);
+      const data = await api.get(`/api/parcels/track/${searchCode.toUpperCase()}`);
       setParcel(data);
     } catch (err: any) {
       setError(err.message || 'Parcel not found');
@@ -30,6 +33,14 @@ export default function Track() {
       setLoading(false);
     }
   };
+
+  // Auto-search if code passed as param
+  useEffect(() => {
+    if (params.code) {
+      setCode(params.code);
+      handleTrack(params.code);
+    }
+  }, [params.code]);
 
   const sc = parcel ? (STATUS_COLORS[parcel.status] || { bg: '#F1F5F9', text: '#64748B' }) : null;
 
