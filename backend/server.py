@@ -446,7 +446,60 @@ async def translate(data: TranslateRequest):
         logger.error(f"Translation error: {e}")
         return {"translated": data.text}
 
-# ============ NOTIFICATIONS ============
+# ============ NOTIFICATION HELPER ============
+
+NOTIFICATION_MESSAGES = {
+    "dropped_off": ("📦 Parcel Dropped Off", "Your parcel {code} has been dropped off and is being processed."),
+    "in_transit": ("🚚 Parcel In Transit", "Your parcel {code} is on its way to {dest}."),
+    "ready_for_pickup": ("📬 Ready for Pickup!", "Your parcel {code} is ready for pickup at {dest}. Your code: {pickup}."),
+    "delivered": ("✅ Parcel Delivered", "Your parcel {code} has been delivered successfully."),
+    "awaiting_dropoff": ("📋 Awaiting Drop-off", "Your parcel {code} is confirmed. Please drop it off at {origin}."),
+}
+
+async def send_parcel_notification(parcel: dict, new_status: str, now: datetime):
+    try:
+        msgs = NOTIFICATION_MESSAGES.get(new_status)
+        if not msgs: return
+        title, body_template = msgs
+        code = parcel.get("tracking_code", "")
+        dest = parcel.get("destination_locker_name", "destination")
+        origin = parcel.get("origin_locker_name", "origin")
+        pickup = parcel.get("qr_code", "")
+        body = body_template.format(code=code, dest=dest, origin=origin, pickup=pickup)
+
+        # Notify recipient for ready_for_pickup
+        if new_status == "ready_for_pickup":
+            recipient = await db.users.find_one({"phone": parcel.get("recipient_phone")})
+            if recipient:
+                await db.notifications.insert_one({
+                    "notification_id": f"notif_{uuid.uuid4().hex[:8]}",
+                    "user_id": recipient["user_id"],
+                    "title": title, "body": body,
+                    "parcel_id": parcel.get("parcel_id"),
+                    "tracking_code": code,
+                    "read": False,
+                    "created_at": now.isoformat(),
+                    "type": new_status,
+                })
+
+        # Notify sender for in_transit, dropped_off, delivered
+        if new_status in ["in_transit", "dropped_off", "delivered"]:
+            sender = await db.users.find_one({"phone": parcel.get("sender_phone")})
+            if sender:
+                await db.notifications.insert_one({
+                    "notification_id": f"notif_{uuid.uuid4().hex[:8]}",
+                    "user_id": sender["user_id"],
+                    "title": title, "body": body,
+                    "parcel_id": parcel.get("parcel_id"),
+                    "tracking_code": code,
+                    "read": False,
+                    "created_at": now.isoformat(),
+                    "type": new_status,
+                })
+    except Exception as e:
+        logger.error(f"Notification error: {e}")
+
+
 
 @api_router.get("/notifications")
 async def get_notifications(request: Request):
