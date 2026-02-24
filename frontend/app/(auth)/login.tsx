@@ -19,6 +19,19 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
 
+  // Navigate when user state changes after login
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'admin') {
+        router.replace('/admin/');
+      } else if (user.role === 'courier') {
+        router.replace('/(courier)/dashboard');
+      } else {
+        router.replace('/(user)/home');
+      }
+    }
+  }, [user]);
+
   const handleLogin = async () => {
     if (!identifier.trim() || !password.trim()) {
       Alert.alert(t('error'), 'Please fill all fields');
@@ -26,8 +39,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const result = await login(identifier.trim(), password);
-      // Navigation will be handled by the login function returning user role
+      await login(identifier.trim(), password);
     } catch (err: any) {
       Alert.alert(t('error'), err.message || 'Login failed');
     } finally {
