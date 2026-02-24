@@ -34,6 +34,7 @@ export const translations: Translations = {
     parcel_size: 'Parcel Size',
     choose_locker: 'Choose Destination Locker',
     payment: 'Payment',
+    payment_method: 'Payment Method',
     small: 'Small',
     medium: 'Medium',
     large: 'Large',
