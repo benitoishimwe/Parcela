@@ -101,3 +101,329 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Build a full-stack mobile and web application prototype for "Akabati," a nationwide parcel locker
+  service in Rwanda. Users can send, receive, and track parcels via a network of automated lockers.
+  - User App: Auth (phone/email + Google), locker finder map, send parcel, track parcel, parcel history
+  - Courier App: Login, view tasks, scan QR codes to confirm collection/delivery
+  - Admin Panel: Dashboard with stats, manage users/agents/lockers/parcels
+  - Integrations: OpenStreetMap, stubbed payments (Mobile Money/Stripe), in-app notifications, QR codes
+  - Design: Akabati branding, English + Kinyarwanda language support
+  - Admin email: benishimwe31@gmail.com / admin123
+  - Test user: +250788111222 / test123
+  - Test courier: +250788333444 / courier123
+
+backend:
+  - task: "User signup and login (JWT)"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented signup and login endpoints with JWT tokens. Seed data includes admin, test user, and courier accounts."
+
+  - task: "Google OAuth callback"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented Google OAuth callback using Emergent Auth. Session-based authentication."
+
+  - task: "Get current user (/api/auth/me)"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoint to retrieve logged-in user details from JWT or session token."
+
+  - task: "Locker CRUD endpoints"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/lockers - returns all lockers. Seed data includes 8 Kigali lockers."
+
+  - task: "Create parcel and process payment"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "POST /api/parcels creates parcel, POST /api/parcels/{id}/payment simulates payment."
+
+  - task: "Track parcel by tracking code"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/parcels/track/{tracking_code} returns parcel without QR data."
+
+  - task: "Get user's parcels"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/parcels/my returns parcels for logged-in user (sender or recipient)."
+
+  - task: "Admin stats and management endpoints"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/admin/stats, /admin/users, /admin/parcels, /admin/lockers all implemented."
+
+  - task: "Courier task management"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/courier/tasks and PUT /api/courier/tasks/{id}/complete implemented."
+
+  - task: "Seed data on startup"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Seeds 8 Kigali lockers, admin user (benishimwe31@gmail.com/admin123), test user (+250788111222/test123), courier (+250788333444/courier123), 5 sample parcels, 2 courier tasks."
+
+frontend:
+  - task: "App loads and shows login screen"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Root index.tsx redirects to auth/login when not authenticated. Fixed Platform import bug in login.tsx (was importing from react, fixed to react-native)."
+
+  - task: "Login with phone/email and password"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(auth)/login.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Login screen connects to /api/auth/login. Demo credentials shown. Fixed Platform import."
+
+  - task: "Signup with name/phone/email/password"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(auth)/signup.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Signup connects to /api/auth/signup endpoint."
+
+  - task: "User home screen with quick actions and recent parcels"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(user)/home.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Home screen shows greeting, quick actions grid, recent parcels. Fetches from /api/parcels/my."
+
+  - task: "Map screen with OpenStreetMap and locker list"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(user)/map.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Shows lockers on Leaflet/OpenStreetMap via WebView. Toggle between map and list view. Offline caching."
+
+  - task: "Send parcel multi-step flow (5 steps)"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(user)/send.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "5-step flow: sender details, recipient, size, locker selection, payment. Stubbed Mobile Money payment."
+
+  - task: "Track parcel with timeline"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(user)/track.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Track by tracking code. Shows route, details, and status timeline."
+
+  - task: "QR Code display after sending parcel"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(user)/qrcode.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Uses react-native-qrcode-svg to display QR. Shows pickup code and sharing options."
+
+  - task: "Parcel history with filters"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(user)/history.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "History screen with All/Active/Delivered filter tabs."
+
+  - task: "Profile screen with language toggle and settings"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(user)/profile.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Profile shows user info, language EN/RW toggle, history, logout. Admin/courier role buttons."
+
+  - task: "Admin dashboard with stats"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/admin/index.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Admin dashboard shows total parcels banner, stats grid, recent parcels."
+
+  - task: "Courier dashboard with task management"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(courier)/dashboard.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Courier tasks list with pending/completed stats. Mark task as complete."
+
+  - task: "Language switching (English/Kinyarwanda)"
+    implemented: true
+    working: "NA"
+    file: "frontend/contexts/LanguageContext.tsx"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "LanguageContext with full EN/RW translations. Toggle on login screen and profile."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "User signup and login (JWT)"
+    - "Get current user (/api/auth/me)"
+    - "Locker CRUD endpoints"
+    - "Create parcel and process payment"
+    - "Track parcel by tracking code"
+    - "Get user's parcels"
+    - "Admin stats and management endpoints"
+    - "Courier task management"
+    - "Seed data on startup"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Backend and frontend have been scaffolded and are running.
+      Backend seed data loads on startup (8 Kigali lockers, admin/test/courier accounts, sample parcels).
+      Fixed a bug in login.tsx where Platform was imported from 'react' instead of 'react-native'.
+      
+      Test credentials:
+      - Admin: benishimwe31@gmail.com / admin123
+      - User: +250788111222 / test123
+      - Courier: +250788333444 / courier123
+      
+      Please test all backend endpoints first, then frontend if needed.
+      Focus on high priority items: auth, parcels, lockers.
