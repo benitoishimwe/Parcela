@@ -284,3 +284,163 @@ class TestCourier:
         r = session.put(f"{BASE_URL}/api/courier/tasks/nonexistent_task/complete",
             headers={"Authorization": f"Bearer {state['courier_token']}"})
         assert r.status_code == 404
+
+
+# ============ ADMIN LOCKERS TESTS ============
+
+class TestAdminLockers:
+    """Admin locker create/edit tests"""
+
+    def test_admin_get_lockers(self, session):
+        if not state.get("admin_token"):
+            pytest.skip("No admin token")
+        r = session.get(f"{BASE_URL}/api/admin/lockers",
+            headers={"Authorization": f"Bearer {state['admin_token']}"})
+        assert r.status_code == 200
+        lockers = r.json()
+        assert isinstance(lockers, list)
+        assert len(lockers) >= 8
+        state["admin_locker_id"] = lockers[0]["locker_id"]
+        print(f"Admin lockers OK: {len(lockers)} lockers")
+
+    def test_admin_create_locker(self, session):
+        if not state.get("admin_token"):
+            pytest.skip("No admin token")
+        r = session.post(f"{BASE_URL}/api/lockers",
+            headers={"Authorization": f"Bearer {state['admin_token']}"},
+            json={
+                "name": "TEST_Locker_Phase5",
+                "address": "Test Address, Kigali",
+                "district": "Gasabo",
+                "lat": -1.95, "lng": 30.07,
+                "total_small": 5, "total_medium": 4, "total_large": 2
+            })
+        assert r.status_code == 200, f"Create locker failed: {r.text}"
+        data = r.json()
+        assert data["name"] == "TEST_Locker_Phase5"
+        state["new_locker_id"] = data["locker_id"]
+        print(f"Create locker OK: {data['locker_id']}")
+
+    def test_admin_edit_locker(self, session):
+        if not state.get("admin_token") or not state.get("new_locker_id"):
+            pytest.skip("Prerequisites missing")
+        r = session.put(f"{BASE_URL}/api/admin/lockers/{state['new_locker_id']}",
+            headers={"Authorization": f"Bearer {state['admin_token']}"},
+            json={"name": "TEST_Locker_Phase5_Updated", "address": "Updated Address"})
+        assert r.status_code == 200, f"Edit locker failed: {r.text}"
+        data = r.json()
+        assert data["name"] == "TEST_Locker_Phase5_Updated"
+        print(f"Edit locker OK")
+
+    def test_admin_change_locker_status(self, session):
+        if not state.get("admin_token") or not state.get("new_locker_id"):
+            pytest.skip("Prerequisites missing")
+        r = session.put(f"{BASE_URL}/api/admin/lockers/{state['new_locker_id']}",
+            headers={"Authorization": f"Bearer {state['admin_token']}"},
+            json={"status": "maintenance"})
+        assert r.status_code == 200
+        data = r.json()
+        assert data["status"] == "maintenance"
+        print(f"Status change OK: {data['status']}")
+
+    def test_admin_locker_no_access_for_user(self, session):
+        if not state.get("user_token"):
+            pytest.skip("No user token")
+        r = session.get(f"{BASE_URL}/api/admin/lockers",
+            headers={"Authorization": f"Bearer {state['user_token']}"})
+        assert r.status_code == 403
+
+
+# ============ COURIER SCAN/STATUS TESTS ============
+
+class TestCourierScan:
+    """Courier parcel lookup and status update tests"""
+
+    def test_courier_lookup_by_tracking(self, session):
+        if not state.get("courier_token") or not state.get("tracking_code"):
+            pytest.skip("Prerequisites missing")
+        # First track to get parcel_id
+        r = session.get(f"{BASE_URL}/api/parcels/track/{state['tracking_code']}")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["tracking_code"] == state["tracking_code"]
+        print(f"Track by code OK: {data['status']}")
+
+    def test_courier_update_status_in_transit(self, session):
+        if not state.get("courier_token") or not state.get("parcel_id"):
+            pytest.skip("Prerequisites missing")
+        r = session.put(f"{BASE_URL}/api/parcels/{state['parcel_id']}/status",
+            headers={"Authorization": f"Bearer {state['courier_token']}"},
+            json={"status": "in_transit", "note": "Updated by courier test"})
+        assert r.status_code == 200, f"Status update failed: {r.text}"
+        data = r.json()
+        assert data["status"] == "in_transit"
+        print(f"Status update to in_transit OK")
+
+    def test_courier_update_status_ready_for_pickup(self, session):
+        if not state.get("courier_token") or not state.get("parcel_id"):
+            pytest.skip("Prerequisites missing")
+        r = session.put(f"{BASE_URL}/api/parcels/{state['parcel_id']}/status",
+            headers={"Authorization": f"Bearer {state['courier_token']}"},
+            json={"status": "ready_for_pickup", "note": "At destination locker"})
+        assert r.status_code == 200
+        data = r.json()
+        assert data["status"] == "ready_for_pickup"
+        print(f"Status update to ready_for_pickup OK")
+
+
+# ============ NOTIFICATIONS TESTS ============
+
+class TestNotifications:
+    """Notification endpoint tests"""
+
+    def test_get_notifications(self, session):
+        if not state.get("user_token"):
+            pytest.skip("No user token")
+        r = session.get(f"{BASE_URL}/api/notifications",
+            headers={"Authorization": f"Bearer {state['user_token']}"})
+        assert r.status_code == 200
+        notifs = r.json()
+        assert isinstance(notifs, list)
+        print(f"GET notifications OK: {len(notifs)} notifications")
+        if notifs:
+            state["notif_id"] = notifs[0]["notification_id"]
+
+    def test_notifications_have_required_fields(self, session):
+        if not state.get("user_token"):
+            pytest.skip("No user token")
+        r = session.get(f"{BASE_URL}/api/notifications",
+            headers={"Authorization": f"Bearer {state['user_token']}"})
+        assert r.status_code == 200
+        notifs = r.json()
+        if notifs:
+            n = notifs[0]
+            assert "notification_id" in n
+            assert "title" in n
+            assert "body" in n
+            assert "read" in n
+            assert "created_at" in n
+            assert "_id" not in n
+            print(f"Notification fields OK: {n['title']}")
+
+    def test_mark_notification_read(self, session):
+        if not state.get("user_token") or not state.get("notif_id"):
+            pytest.skip("No notification to mark")
+        r = session.put(f"{BASE_URL}/api/notifications/{state['notif_id']}/read", json={},
+            headers={"Authorization": f"Bearer {state['user_token']}"})
+        assert r.status_code == 200
+        print(f"Mark read OK")
+
+    def test_mark_all_notifications_read(self, session):
+        if not state.get("user_token"):
+            pytest.skip("No user token")
+        r = session.put(f"{BASE_URL}/api/notifications/read-all", json={},
+            headers={"Authorization": f"Bearer {state['user_token']}"})
+        assert r.status_code == 200
+        data = r.json()
+        assert "message" in data
+        print(f"Mark all read OK: {data}")
+
+    def test_notifications_unauthenticated(self, session):
+        r = session.get(f"{BASE_URL}/api/notifications")
+        assert r.status_code == 401
