@@ -26,7 +26,8 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      await login(identifier.trim(), password);
+      const result = await login(identifier.trim(), password);
+      // Navigation will be handled by the login function returning user role
     } catch (err: any) {
       Alert.alert(t('error'), err.message || 'Login failed');
     } finally {
