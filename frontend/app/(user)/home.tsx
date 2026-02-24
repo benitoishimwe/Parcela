@@ -70,9 +70,23 @@ export default function Home() {
             <Text style={styles.greeting}>{greeting()},</Text>
             <Text style={styles.userName} testID="user-name">{user?.name?.split(' ')[0] || 'User'} 👋</Text>
           </View>
-          <TouchableOpacity style={styles.avatar} onPress={() => router.push('/(user)/profile')}>
-            <Text style={styles.avatarText}>{user?.name?.[0]?.toUpperCase() || 'U'}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              testID="notifications-bell"
+              style={styles.bellBtn}
+              onPress={() => router.push('/(user)/notifications')}
+            >
+              <Ionicons name="notifications-outline" size={24} color={Colors.textPrimary} />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.avatar} onPress={() => router.push('/(user)/profile')}>
+              <Text style={styles.avatarText}>{user?.name?.[0]?.toUpperCase() || 'U'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Active parcel banner */}
