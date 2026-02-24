@@ -18,6 +18,7 @@ export default function Home() {
   const [parcels, setParcels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const greeting = () => {
     const h = new Date().getHours();
