@@ -354,7 +354,11 @@ async def update_status(parcel_id: str, data: StatusUpdate, request: Request):
         "$set": {"status": data.status},
         "$push": {"status_history": {"status": data.status, "timestamp": now.isoformat(), "note": data.note or STATUS_LABELS[data.status]}}
     })
-    return await db.parcels.find_one({"parcel_id": parcel_id}, {"_id": 0})
+    parcel = await db.parcels.find_one({"parcel_id": parcel_id}, {"_id": 0})
+    # Auto-create notifications
+    if parcel:
+        await send_parcel_notification(parcel, data.status, now)
+    return parcel
 
 # ============ COURIER ============
 
