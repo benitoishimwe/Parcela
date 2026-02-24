@@ -36,7 +36,15 @@ export default function Home() {
     setRefreshing(false);
   }, [token]);
 
-  useEffect(() => { fetchParcels(); }, [fetchParcels]);
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
+    try {
+      const data = await api.get('/api/notifications', token);
+      setUnreadCount(data.filter((n: any) => !n.read).length);
+    } catch {}
+  }, [token]);
+
+  useEffect(() => { fetchParcels(); fetchNotifications(); }, [fetchParcels, fetchNotifications]);
 
   const onRefresh = () => { setRefreshing(true); fetchParcels(); };
 
