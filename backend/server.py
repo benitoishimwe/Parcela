@@ -512,6 +512,12 @@ async def mark_read(notif_id: str, request: Request):
     await db.notifications.update_one({"notification_id": notif_id, "user_id": user["user_id"]}, {"$set": {"read": True}})
     return {"message": "ok"}
 
+@api_router.put("/notifications/read-all")
+async def mark_all_read(request: Request):
+    user = await get_current_user(request)
+    await db.notifications.update_many({"user_id": user["user_id"], "read": False}, {"$set": {"read": True}})
+    return {"message": "ok"}
+
 # ============ SEED DATA ============
 
 KIGALI_LOCKERS = [
