@@ -65,12 +65,12 @@ export default function Track() {
                 placeholder={t('enter_tracking')}
                 autoCapitalize="characters"
                 placeholderTextColor={Colors.textTertiary}
-                onSubmitEditing={handleTrack}
+                onSubmitEditing={() => handleTrack()}
               />
               <TouchableOpacity
                 testID="track-submit"
                 style={[styles.searchBtn, !code.trim() && styles.searchBtnDisabled]}
-                onPress={handleTrack}
+                onPress={() => handleTrack()}
                 disabled={!code.trim() || loading}
               >
                 {loading ? <ActivityIndicator color={Colors.white} size="small" /> : <Ionicons name="search" size={22} color={Colors.white} />}
