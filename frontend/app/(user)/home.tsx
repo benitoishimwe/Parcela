@@ -190,6 +190,14 @@ const styles = StyleSheet.create({
   },
   greeting: { fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
   userName: { fontSize: 22, fontWeight: '800', color: Colors.textPrimary, marginTop: 2 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  bellBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  badge: {
+    position: 'absolute', top: 4, right: 4, backgroundColor: Colors.error,
+    borderRadius: 10, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeText: { color: Colors.white, fontSize: 10, fontWeight: '800' },
   avatar: {
     width: 44, height: 44, backgroundColor: Colors.primary,
     borderRadius: 22, alignItems: 'center', justifyContent: 'center',
