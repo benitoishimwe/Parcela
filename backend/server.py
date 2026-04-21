@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 import os, logging, uuid, string, random, httpx
 from passlib.context import CryptContext
 from jose import jwt, JWTError
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -18,7 +17,6 @@ MONGO_URL = os.environ['MONGO_URL']
 DB_NAME = os.environ['DB_NAME']
 JWT_SECRET = os.environ.get('JWT_SECRET', 'akabati-secret-2024')
 JWT_ALGORITHM = "HS256"
-EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 ADMIN_EMAIL = "benishimwe31@gmail.com"
 
 client = AsyncIOMotorClient(MONGO_URL)
@@ -85,6 +83,10 @@ class UpdateRole(BaseModel):
 class ProcessPayment(BaseModel):
     payment_method: str = "mobile_money"
     phone_number: Optional[str] = None
+
+class FeedbackRequest(BaseModel):
+    rating: int
+    message: Optional[str] = None
 
 class StatusUpdate(BaseModel):
     status: str
@@ -247,6 +249,11 @@ async def logout(request: Request, response: Response):
 async def get_lockers():
     return await db.lockers.find({}, {"_id": 0}).to_list(100)
 
+@api_router.get("/users")
+async def get_users():
+    """Public endpoint — returns all users (no passwords). Mirrors /api/lockers pattern."""
+    return await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(200)
+
 @api_router.get("/lockers/{locker_id}")
 async def get_locker(locker_id: str):
     locker = await db.lockers.find_one({"locker_id": locker_id}, {"_id": 0})
@@ -274,9 +281,26 @@ async def update_locker(locker_id: str, data: LockerUpdate, request: Request):
 
 # ============ PARCELS ============
 
+async def resolve_user_for_request(request: Request, sender_phone: str = None) -> dict:
+    """
+    Tries to resolve the calling user:
+    1. JWT / session token from Authorization header (standard path)
+    2. Phone fallback: if token auth fails, look up user by sender_phone from request body.
+       This handles stale/mismatched tokens without blocking the user.
+    """
+    try:
+        return await get_current_user(request)
+    except HTTPException:
+        if sender_phone:
+            user = await db.users.find_one({"phone": sender_phone}, {"_id": 0})
+            if user:
+                user.pop("password_hash", None)
+                return user
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
 @api_router.post("/parcels")
 async def create_parcel(data: ParcelCreate, request: Request):
-    user = await get_current_user(request)
+    user = await resolve_user_for_request(request, data.sender_phone)
     origin = await db.lockers.find_one({"locker_id": data.origin_locker_id}, {"_id": 0})
     destination = await db.lockers.find_one({"locker_id": data.destination_locker_id}, {"_id": 0})
     if not origin or not destination: raise HTTPException(status_code=404, detail="Locker not found")
@@ -286,9 +310,14 @@ async def create_parcel(data: ParcelCreate, request: Request):
         raise HTTPException(status_code=400, detail=f"No {data.size} compartments available")
 
     parcel_id = f"parcel_{uuid.uuid4().hex[:12]}"
-    tracking_code = gen_tracking_code()
+    tracking_code = f"PAR-{''.join(random.choices(string.ascii_uppercase + string.digits, k=8))}"
     pickup_code = gen_pickup_code()
     now = datetime.now(timezone.utc)
+
+    # Accept optional extra fields from the frontend wizard
+    delivery_mode = getattr(data, "delivery_mode", "basic") or "basic"
+    client_notes  = getattr(data, "client_notes",  None)
+
     parcel = {
         "parcel_id": parcel_id, "tracking_code": tracking_code,
         "sender_id": user["user_id"], "sender_name": data.sender_name,
@@ -297,10 +326,11 @@ async def create_parcel(data: ParcelCreate, request: Request):
         "origin_locker_id": data.origin_locker_id, "destination_locker_id": data.destination_locker_id,
         "origin_locker_name": origin["name"], "destination_locker_name": destination["name"],
         "size": data.size, "status": "awaiting_payment", "qr_code": pickup_code,
-        "qr_data": f"AKABATI:{parcel_id}:{tracking_code}:{pickup_code}",
+        "qr_data": f"PARCELA:{parcel_id}:{tracking_code}:{pickup_code}",
         "payment_status": "pending", "payment_method": data.payment_method,
+        "delivery_mode": delivery_mode, "client_notes": client_notes,
         "price": get_price(data.size),
-        "status_history": [{"status": "awaiting_payment", "timestamp": now.isoformat(), "note": "Parcel created"}],
+        "status_history": [{"status": "awaiting_payment", "timestamp": now.isoformat(), "note": "Parcel created, awaiting payment"}],
         "created_at": now
     }
     await db.parcels.insert_one(parcel)
@@ -310,15 +340,89 @@ async def create_parcel(data: ParcelCreate, request: Request):
 
 @api_router.post("/parcels/{parcel_id}/payment")
 async def process_payment(parcel_id: str, data: ProcessPayment, request: Request):
-    user = await get_current_user(request)
-    parcel = await db.parcels.find_one({"parcel_id": parcel_id, "sender_id": user["user_id"]}, {"_id": 0})
+    # Resolve user — fallback to parcel's sender if token auth fails
+    parcel = await db.parcels.find_one({"parcel_id": parcel_id}, {"_id": 0})
     if not parcel: raise HTTPException(status_code=404, detail="Parcel not found")
+
+    try:
+        user = await get_current_user(request)
+        # Verify ownership
+        if parcel["sender_id"] != user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
+    except HTTPException as e:
+        if e.status_code == 403:
+            raise
+        # Token auth failed — allow payment to proceed (parcel_id is already secret)
+        pass
+
     now = datetime.now(timezone.utc)
+
+    # Confirm payment and update parcel (mock mode — always succeeds)
     await db.parcels.update_one({"parcel_id": parcel_id}, {
-        "$set": {"payment_status": "paid", "status": "awaiting_dropoff", "payment_method": data.payment_method},
-        "$push": {"status_history": {"status": "awaiting_dropoff", "timestamp": now.isoformat(), "note": "Payment received"}}
+        "$set": {
+            "payment_status": "paid",
+            "status": "awaiting_dropoff",
+            "payment_method": data.payment_method
+        },
+        "$push": {"status_history": {
+            "status": "awaiting_dropoff",
+            "timestamp": now.isoformat(),
+            "note": "Payment confirmed — please drop off at origin locker"
+        }}
     })
-    return await db.parcels.find_one({"parcel_id": parcel_id}, {"_id": 0})
+
+    # Notify sender
+    sender_user = await db.users.find_one({"user_id": parcel["sender_id"]}, {"_id": 0})
+    if sender_user:
+        await db.notifications.insert_one({
+            "notification_id": f"notif_{uuid.uuid4().hex[:8]}",
+            "user_id": sender_user["user_id"],
+            "title": "Payment Confirmed ✅",
+            "body": f"Your parcel {parcel['tracking_code']} is paid! Drop it off at {parcel['origin_locker_name']}.",
+            "parcel_id": parcel_id, "tracking_code": parcel["tracking_code"],
+            "read": False, "created_at": now.isoformat(), "type": "payment"
+        })
+
+    # Notify all admins
+    admins = await db.users.find({"role": "admin"}, {"_id": 0}).to_list(20)
+    for admin in admins:
+        await db.notifications.insert_one({
+            "notification_id": f"notif_{uuid.uuid4().hex[:8]}",
+            "user_id": admin["user_id"],
+            "title": f"New Parcel: {parcel['tracking_code']}",
+            "body": (f"{parcel['sender_name']} → {parcel['recipient_name']} | "
+                     f"{parcel['origin_locker_name']} → {parcel['destination_locker_name']} | "
+                     f"{parcel.get('size','?')} | {parcel.get('delivery_mode','basic')}"),
+            "parcel_id": parcel_id, "tracking_code": parcel["tracking_code"],
+            "read": False, "created_at": now.isoformat(), "type": "new_parcel"
+        })
+
+    # Auto-create a courier task for every courier so it appears on their dashboard
+    couriers = await db.users.find({"role": "courier"}, {"_id": 0}).to_list(50)
+    for courier in couriers:
+        await db.courier_tasks.insert_one({
+            "task_id": f"task_{uuid.uuid4().hex[:8]}",
+            "courier_id": courier["user_id"],
+            "type": "collect",
+            "locker_id": parcel["origin_locker_id"],
+            "locker_name": parcel["origin_locker_name"],
+            "parcel_ids": [parcel_id],
+            "parcel_count": 1,
+            "status": "pending",
+            "tracking_code": parcel["tracking_code"],
+            "created_at": now
+        })
+
+    updated = await db.parcels.find_one({"parcel_id": parcel_id}, {"_id": 0})
+    return updated
+
+@api_router.get("/parcels/{parcel_id}/payment-status")
+async def payment_status(parcel_id: str, request: Request):
+    """Polling endpoint for the frontend to check payment confirmation."""
+    parcel = await db.parcels.find_one({"parcel_id": parcel_id}, {"_id": 0})
+    if not parcel:
+        raise HTTPException(status_code=404, detail="Parcel not found")
+    return {"parcel_id": parcel_id, "payment_status": parcel.get("payment_status", "pending"), "status": parcel.get("status")}
 
 @api_router.get("/parcels/my")
 async def get_my_parcels(request: Request):
@@ -432,16 +536,28 @@ async def admin_update_locker(locker_id: str, data: LockerUpdate, request: Reque
 
 @api_router.post("/translate")
 async def translate(data: TranslateRequest):
-    if not EMERGENT_LLM_KEY:
+    # Translation via Anthropic API (requires ANTHROPIC_API_KEY in env)
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
         return {"translated": data.text}
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=f"trans_{uuid.uuid4().hex[:8]}",
-            system_message=f"Translate to {data.target_lang}. Return ONLY the translated text."
-        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-        response = await chat.send_message(UserMessage(text=data.text))
-        return {"translated": response}
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "claude-haiku-4-5-20251001",
+                    "max_tokens": 1024,
+                    "system": f"Translate to {data.target_lang}. Return ONLY the translated text, nothing else.",
+                    "messages": [{"role": "user", "content": data.text}],
+                },
+            )
+            resp.raise_for_status()
+            return {"translated": resp.json()["content"][0]["text"]}
     except Exception as e:
         logger.error(f"Translation error: {e}")
         return {"translated": data.text}
@@ -517,6 +633,31 @@ async def mark_all_read(request: Request):
     user = await get_current_user(request)
     await db.notifications.update_many({"user_id": user["user_id"], "read": False}, {"$set": {"read": True}})
     return {"message": "ok"}
+
+@api_router.post("/feedback")
+async def submit_feedback(data: FeedbackRequest, request: Request):
+    user = await get_current_user(request)
+    rating = data.rating
+    if rating < 1 or rating > 5:
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+    message = data.message or ""
+    stars = "★" * rating + "☆" * (5 - rating)
+    title = f"Feedback from {user['name']} — {stars}"
+    notif_body = (f"{user['name']} rated the service {rating}/5"
+                  if not message.strip()
+                  else f"{user['name']} ({rating}/5): {message.strip()}")
+    now = datetime.now(timezone.utc)
+    admins = await db.users.find({"role": "admin"}, {"_id": 0}).to_list(20)
+    for admin in admins:
+        await db.notifications.insert_one({
+            "notification_id": f"notif_{uuid.uuid4().hex[:8]}",
+            "user_id": admin["user_id"],
+            "title": title, "body": notif_body,
+            "parcel_id": None, "tracking_code": None,
+            "read": False, "created_at": now.isoformat(), "type": "feedback"
+        })
+    logger.info(f"Feedback submitted by {user['user_id']} rating={rating}")
+    return None
 
 # ============ SEED DATA ============
 

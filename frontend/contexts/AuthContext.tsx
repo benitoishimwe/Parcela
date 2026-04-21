@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           try {
             window.history.replaceState(null, '', window.location.pathname);
             const result = await api.post('/api/auth/google/callback', { session_id: sessionId });
-            await storage.set('akabati_token', result.token);
+            await storage.set('parcela_token', result.token);
             setToken(result.token);
             setUser(result.user);
           } catch (err) {
@@ -62,14 +62,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const checkStoredToken = async () => {
     try {
-      const t = await storage.get('akabati_token');
+      const t = await storage.get('parcela_token');
       if (t) {
         const userData = await api.get('/api/auth/me', t);
         setToken(t);
         setUser(userData);
       }
     } catch {
-      await storage.delete('akabati_token');
+      await storage.delete('parcela_token');
     } finally {
       setLoading(false);
     }
@@ -77,28 +77,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (identifier: string, password: string) => {
     const result = await api.post('/api/auth/login', { identifier, password });
-    await storage.set('akabati_token', result.token);
+    await storage.set('parcela_token', result.token);
     setToken(result.token);
     setUser(result.user);
   };
 
   const signup = async (name: string, phone: string, email: string, password: string) => {
     const result = await api.post('/api/auth/signup', { name, phone, email: email || undefined, password });
-    await storage.set('akabati_token', result.token);
+    await storage.set('parcela_token', result.token);
     setToken(result.token);
     setUser(result.user);
   };
 
   const googleLogin = async (sessionId: string) => {
     const result = await api.post('/api/auth/google/callback', { session_id: sessionId });
-    await storage.set('akabati_token', result.token);
+    await storage.set('parcela_token', result.token);
     setToken(result.token);
     setUser(result.user);
   };
 
   const logout = async () => {
     try { await api.post('/api/auth/logout', {}, token || undefined); } catch {}
-    await storage.delete('akabati_token');
+    await storage.delete('parcela_token');
     setToken(null);
     setUser(null);
   };

@@ -15,14 +15,14 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   const [language, setLang] = useState<LangKey>('en');
 
   useEffect(() => {
-    AsyncStorage.getItem('akabati_lang').then(lang => {
+    AsyncStorage.getItem('parcela_lang').then(lang => {
       if (lang === 'en' || lang === 'rw') setLang(lang);
     });
   }, []);
 
   const setLanguage = async (lang: LangKey) => {
     setLang(lang);
-    await AsyncStorage.setItem('akabati_lang', lang);
+    await AsyncStorage.setItem('parcela_lang', lang);
   };
 
   const t = (key: string): string =>
