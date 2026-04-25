@@ -1,0 +1,213 @@
+{
+  "project_name": "Akabati",
+  "version": "1.0.0",
+  "description": "Rwanda's Parcel Locker Network Mobile App Design System",
+  "tech_stack": {
+    "framework": "React Native Expo",
+    "navigation": "expo-router",
+    "styling": "StyleSheet (No Tailwind/NativeWind)",
+    "icons": "@expo/vector-icons",
+    "maps": "react-native-webview (OpenStreetMap)",
+    "fonts": "System Fonts (San Francisco / Roboto)"
+  },
+  "theme": {
+    "mode": "light",
+    "rationale": "Light theme reflects the 'Trust' and 'Daytime Logistics' nature of the service. It aligns with the vibrant Rwandan flag colors without causing eye strain in bright outdoor conditions."
+  },
+  "colors": {
+    "primary": {
+      "blue": "#00A1DE",
+      "blue_dark": "#0077A3",
+      "blue_light": "#E0F2FE"
+    },
+    "secondary": {
+      "yellow": "#FAD201",
+      "yellow_dark": "#C7A600",
+      "yellow_light": "#FEFCE8"
+    },
+    "accent": {
+      "green": "#20603D",
+      "green_dark": "#143D26",
+      "green_light": "#DCFCE7"
+    },
+    "neutral": {
+      "white": "#FFFFFF",
+      "background": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "border": "#E2E8F0",
+      "text_primary": "#0F172A",
+      "text_secondary": "#64748B",
+      "text_tertiary": "#94A3B8"
+    },
+    "semantic": {
+      "success": "#20603D",
+      "error": "#EF4444",
+      "warning": "#F59E0B",
+      "info": "#00A1DE"
+    }
+  },
+  "typography": {
+    "font_family": {
+      "heading": "System",
+      "body": "System"
+    },
+    "sizes": {
+      "xs": 12,
+      "sm": 14,
+      "base": 16,
+      "lg": 18,
+      "xl": 20,
+      "2xl": 24,
+      "3xl": 30,
+      "4xl": 36
+    },
+    "weights": {
+      "regular": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    },
+    "line_heights": {
+      "tight": 1.2,
+      "normal": 1.5,
+      "relaxed": 1.75
+    }
+  },
+  "spacing": {
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48,
+    "container_padding": 20
+  },
+  "border_radius": {
+    "sm": 6,
+    "md": 12,
+    "lg": 16,
+    "full": 9999
+  },
+  "shadows": {
+    "small": {
+      "shadowColor": "#000",
+      "shadowOffset": { "width": 0, "height": 1 },
+      "shadowOpacity": 0.05,
+      "shadowRadius": 2,
+      "elevation": 2
+    },
+    "medium": {
+      "shadowColor": "#000",
+      "shadowOffset": { "width": 0, "height": 4 },
+      "shadowOpacity": 0.1,
+      "shadowRadius": 6,
+      "elevation": 4
+    },
+    "large": {
+      "shadowColor": "#000",
+      "shadowOffset": { "width": 0, "height": 10 },
+      "shadowOpacity": 0.15,
+      "shadowRadius": 12,
+      "elevation": 10
+    }
+  },
+  "components": {
+    "button": {
+      "height": 56,
+      "borderRadius": 12,
+      "paddingHorizontal": 24,
+      "textStyle": {
+        "fontSize": 16,
+        "fontWeight": "700",
+        "textAlign": "center"
+      },
+      "variants": {
+        "primary": {
+          "backgroundColor": "#00A1DE",
+          "textColor": "#FFFFFF"
+        },
+        "secondary": {
+          "backgroundColor": "#FAD201",
+          "textColor": "#0F172A"
+        },
+        "outline": {
+          "backgroundColor": "transparent",
+          "borderColor": "#00A1DE",
+          "borderWidth": 1,
+          "textColor": "#00A1DE"
+        }
+      }
+    },
+    "input": {
+      "height": 56,
+      "borderRadius": 12,
+      "backgroundColor": "#F8FAFC",
+      "borderColor": "#E2E8F0",
+      "borderWidth": 1,
+      "paddingHorizontal": 16,
+      "fontSize": 16,
+      "color": "#0F172A"
+    },
+    "card": {
+      "backgroundColor": "#FFFFFF",
+      "borderRadius": 16,
+      "padding": 16,
+      "marginBottom": 16
+    }
+  },
+  "assets": {
+    "images": [
+      {
+        "category": "courier",
+        "description": "Courier on motorbike delivery (Rwanda context)",
+        "url": "https://images.unsplash.com/photo-1682773083899-0948e4e7d8d3",
+        "usage": "Courier App Dashboard, Onboarding"
+      },
+      {
+        "category": "user",
+        "description": "Happy African woman using smartphone",
+        "url": "https://images.pexels.com/photos/2531358/pexels-photo-2531358.jpeg",
+        "usage": "User App Home, Splash Screen"
+      },
+      {
+        "category": "locker",
+        "description": "Yellow modern parcel lockers",
+        "url": "https://images.pexels.com/photos/17116897/pexels-photo-17116897.jpeg",
+        "usage": "Locker Finder, Send Parcel Step 1"
+      },
+      {
+        "category": "package",
+        "description": "Cardboard delivery box",
+        "url": "https://images.unsplash.com/photo-1631010231931-d2c396b444ec",
+        "usage": "Track Parcel, Parcel Details"
+      },
+      {
+        "category": "city",
+        "description": "Kigali City Skyline",
+        "url": "https://images.pexels.com/photos/31466702/pexels-photo-31466702.jpeg",
+        "usage": "Background overlay (low opacity)"
+      }
+    ]
+  },
+  "layout_rules": {
+    "safe_area": "Always wrap screens in <SafeAreaView> from react-native-safe-area-context",
+    "touch_targets": "All interactive elements must be at least 44x44 points",
+    "text_alignment": "Left align body text for readability. Center align headings only in onboarding or modals.",
+    "icons": "Use @expo/vector-icons/Ionicons or MaterialCommunityIcons. Size 24px default.",
+    "bottom_sheet": "Use custom absolute positioned views or modal for 'Quick Actions' to keep them reachable."
+  },
+  "accessibility": {
+    "contrast": "Ensure text on Yellow (#FAD201) backgrounds is Dark (#0F172A), never White.",
+    "labels": "All inputs and buttons must have accessibilityLabel prop."
+  },
+  "instructions_to_main_agent": [
+    "You are building a React Native Expo app.",
+    "DO NOT use 'className' or Tailwind. Use 'StyleSheet.create({})' for all styles.",
+    "Create a 'constants/Colors.js' file using the colors defined in this JSON.",
+    "Create a 'components/Button.js' and 'components/Input.js' that strictly follow the design tokens here.",
+    "For the Map, use 'react-native-webview' loading an OpenStreetMap URL if native maps are too complex to set up without API keys.",
+    "Prioritize the 'Courier' flow having big, high-contrast buttons for outdoor visibility.",
+    "Use the provided image URLs for mock data and UI placeholders."
+  ]
+}
