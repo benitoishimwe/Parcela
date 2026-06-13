@@ -77,11 +77,32 @@ agenthub/agents/youtube/db
 .cache/
 
 # Mobile development
-android-sdk/ -e 
+android-sdk/
+
 # Environment files
+.env
+.env.*
 *.env
 *.env.*
--e 
-# Environment files
-*.env
-*.env.*
+
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+hs_err_pid*.log
+replay_pid*.log
+
+# Expo / React Native
+frontend/.expo/
+frontend/android/
+frontend/ios/
+frontend/.metro-cache/
+frontend/dist/
+frontend/web-build/
+
+# Docs screenshots (add manually)
+docs/screenshots/*.png
+docs/screenshots/*.jpg
+docs/screenshots/*.gif
+docs/screenshots/*.webp
