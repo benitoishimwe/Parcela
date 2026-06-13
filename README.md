@@ -93,23 +93,23 @@ Rwanda's last-mile logistics landscape suffers from a fundamental structural gap
 
 | Home Dashboard | Send a Parcel | Parcel Lockers Map |
 |---|---|---|
-| ![Home](docs/screenshots/user-home.png) | ![Send](docs/screenshots/user-send.png) | ![Map](docs/screenshots/user-map.png) |
+| ![Home](docs/screenshots/user-home.png.png) | ![Send](docs/screenshots/user-send.png.png) | ![Map](docs/screenshots/user-map.png.png) |
 
 | QR Code Drop-off | Track a Parcel | Profile |
 |---|---|---|
-| ![QR](docs/screenshots/user-qr.png) | ![Track](docs/screenshots/user-track.png) | ![Profile](docs/screenshots/user-profile.png) |
+| ![QR](docs/screenshots/user-qr.png.png) | ![Track](docs/screenshots/user-track.png.png) | ![Profile](docs/screenshots/user-profile.png.png) |
 
 ### Courier App
 
 | Courier Dashboard | Task Detail |
 |---|---|
-| ![Courier Dashboard](docs/screenshots/courier-dashboard.png) | ![Task](docs/screenshots/courier-task.png) |
+| ![Courier Dashboard](docs/screenshots/courier-dashboard.png.png) | ![Task](docs/screenshots/courier-task.png.png) |
 
 ### Admin Panel
 
 | Dashboard Overview | Locker Management | User Management | Parcel List |
 |---|---|---|---|
-| ![Admin Dashboard](docs/screenshots/admin-dashboard.png) | ![Lockers](docs/screenshots/admin-lockers.png) | ![Users](docs/screenshots/admin-users.png) | ![Parcels](docs/screenshots/admin-parcels.png) |
+| ![Admin Dashboard](docs/screenshots/admin-dashboard.png.png) | ![Lockers](docs/screenshots/admin-lockers.png.png) | ![Users](docs/screenshots/admin-users.png.png) | ![Parcels](docs/screenshots/admin-parcels.png.png) |
 
 ---
 
